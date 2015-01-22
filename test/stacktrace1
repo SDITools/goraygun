@@ -1,0 +1,9 @@
+goroutine 7 [running]:
+github.com/sditools/go-raygun.getRawStackTrace(0x0, 0x0, 0x0)
+  /Users/dedalus/Go/src/github.com/sditools/go-raygun/stacktrace.go:31 +0x8d
+github.com/sditools/go-raygun.GetStackTrace(0x2, 0x0, 0x0, 0x0, 0x0, 0x0)
+  /Users/dedalus/Go/src/github.com/sditools/go-raygun/stacktrace.go:20 +0x52
+github.com/sditools/go-raygun.(*Client).Report(0xc208078400, 0x630940, 0xc20802b3f0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, ...)
+  /Users/dedalus/Go/src/github.com/sditools/go-raygun/raygun.go:51 +0x4b
+github.com/sditools/go-raygun_test.func·009()
+  /Users/dedalus/Go/src/github.com/sditools/go-raygun/raygun_test.go:88 +0x2f4
