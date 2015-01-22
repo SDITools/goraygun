@@ -2,7 +2,6 @@ package goraygun
 
 import (
   "errors"
-  // "fmt"
   "regexp"
   "runtime"
   "strconv"
