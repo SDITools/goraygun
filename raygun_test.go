@@ -7,7 +7,7 @@ import (
   // "github.com/kr/pretty"
   . "github.com/onsi/ginkgo"
   . "github.com/onsi/gomega"
-  "github.com/sditools/go-raygun"
+  "github.com/sditools/goraygun"
   "io/ioutil"
   "net/http"
   "net/http/httptest"

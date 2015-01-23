@@ -28,13 +28,14 @@ type Client struct {
 }
 
 func Init(s Settings, e Entry) (c Client) {
-  c.settings = s
-  c.Entry = e
-
   // provide user the option to override (for testing)
   if s.Endpoint == "" {
     s.Endpoint = ENDPOINT
   }
+
+  c.settings = s
+  e.Details.Environment.populate()
+  c.Entry = e
   return
 }
 
@@ -48,7 +49,7 @@ func (c *Client) Report(err error, entry Entry) {
   if !c.settings.Enabled {
     return
   }
-  st, stErr := GetStackTrace(2)
+  st, stErr := GetStackTrace(3)
   if stErr != nil {
     // handle stErr
     return

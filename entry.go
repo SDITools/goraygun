@@ -4,6 +4,10 @@ import (
   "os"
   "os/exec"
   // "strconv"
+  // "fmt"
+  // "github.com/kr/pretty"
+  "net/http"
+  "runtime"
   "strings"
   "time"
 )
@@ -27,6 +31,11 @@ func (e *Entry) populate(err error, st []StackTraceElement) {
   return
 }
 
+func getMemStats() (m runtime.MemStats) {
+  runtime.ReadMemStats(&m)
+  return
+}
+
 type Entry struct {
   OccurredOn string  `json:"occurredOn"`
   Details    details `json:"details"`
@@ -40,9 +49,6 @@ type details struct {
   Context     contextDetails     `json:"context"`
   Environment environmentDetails `json:"environment"`
   Request     requestDetails     `json:"request"`
-  //UserCustomData userCustomerDataDetail `json:"userCustomData"`
-  //Response       detailResponse         `json:"response"`
-  //User           detailUser             `json:"user"`
 }
 
 type clientDetails struct {
@@ -69,45 +75,45 @@ type environmentDetails struct {
   Cpu                     string `json:"cpu"`
   PackageVersion          string `json:"packageVersion"`
   Architecture            string `json:"architecture"`
-  TotalPhysicalMemory     int    `json:"totalPhysicalMemory"`
-  AvailablePhysicalMemory int    `json:"availablePhysicalMemory"`
-  TotalVirtualMemory      int    `json:"totalVirtualMemory"`
-  AvailableVirtualMemory  int    `json:"availableVirtualMemory"`
-  DiskSpaceFree           []int  `json:"diskSpaceFree"`
+  TotalPhysicalMemory     uint64 `json:"totalPhysicalMemory"`
+  AvailablePhysicalMemory uint64 `json:"availablePhysicalMemory"`
   Locale                  string `json:"locale"`
 }
 
+func (ed *environmentDetails) populate() {
+  memstats := getMemStats()
+  ed.ProcessorCount = runtime.NumCPU()
+  ed.OsVersion = runtime.GOOS
+  ed.TotalPhysicalMemory = memstats.Sys
+  ed.AvailablePhysicalMemory = memstats.Sys - memstats.Alloc
+}
+
 type requestDetails struct {
-  HostName    string `json:"hostName"`
-  Url         string `json:"url"`
-  HttpMethod  string `json:"httpMethod"`
-  IpAddress   string `json:"ipAddress"`
-  Querystring string `json:"querystring"`
-  Form        string `json:"form"`
-  Headers     string `json:"headers"`
-  RawData     string `json:"rawData"`
-  // Querystring requestQuerystring `json:"querystring"`
-  // Form        requestForm        `json:"form"`
-  // Headers     requestHeaders     `json:"headers"`
-  // RawData     requestRawData     `json:"rawData"`
+  HostName    string            `json:"hostName"`
+  Url         string            `json:"url"`
+  HttpMethod  string            `json:"httpMethod"`
+  IpAddress   string            `json:"iPAddress"`
+  Querystring string            `json:"querystring"`
+  Form        map[string]string `json:"form"`
+  Headers     map[string]string `json:"headers"`
 }
 
-type requestQuerystring struct {
-  data string
+func (rd *requestDetails) Populate(r http.Request) {
+  rd.HostName = r.Host
+  rd.Url = r.URL.String()
+  rd.HttpMethod = r.Method
+  rd.IpAddress = r.RemoteAddr
+  rd.Querystring = r.URL.RawQuery
+  rd.Headers = joinChild(r.Header, ", ")
+  rd.Form = joinChild(r.Form, ", ")
 }
 
-type requestForm struct{}
-
-type requestHeaders struct{}
-
-type requestRawData struct{}
-
-type detailResponse struct {
-  StatusCode int `json:"statusCode"`
-}
-
-type detailUser struct {
-  Identifier string `json:"identifier"`
+func joinChild(m map[string][]string, sep string) map[string]string {
+  newMap := make(map[string]string)
+  for k, v := range m {
+    newMap[k] = strings.Join(v, sep)
+  }
+  return newMap
 }
 
 type contextDetails struct {
