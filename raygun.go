@@ -5,6 +5,7 @@ import (
   "errors"
   "log"
   "net/http"
+  "strconv"
   "strings"
 )
 
@@ -46,12 +47,14 @@ func (c *Client) Recover() {
 }
 
 func (c *Client) Report(err error, entry Entry) {
-  if !c.settings.Enabled {
-    return
-  }
   st, stErr := GetStackTrace(3)
   if stErr != nil {
     // handle stErr
+    return
+  }
+  if !c.settings.Enabled {
+    log.Println("Error:", err.Error())
+    log.Println(st[0].FileName + ":" + strconv.Itoa(st[0].LineNumber))
     return
   }
   entry.populate(err, st)
