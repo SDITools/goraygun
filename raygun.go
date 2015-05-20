@@ -17,9 +17,9 @@ const (
 )
 
 type Settings struct {
-	ApiKey   string
-	Enabled  bool
-	Endpoint string
+	ApiKey      string
+	Endpoint    string
+	Environment string
 }
 
 type Client struct {
@@ -48,15 +48,12 @@ func (c *Client) Recover() {
 }
 
 func (c *Client) Report(err error, entry Entry) {
-	if !c.settings.Enabled {
-		return
-	}
 	st, stErr := GetStackTrace(3)
 	if stErr != nil {
 		// handle stErr
 		return
 	}
-	entry.populate(err, st)
+	entry.populate(err, st, c.settings.Environment)
 	c.post(entry, c.settings.Endpoint)
 }
 
